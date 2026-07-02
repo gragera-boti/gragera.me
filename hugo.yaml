@@ -1,0 +1,101 @@
+baseURL: "https://gragera.me/"
+locale: en-us
+title: "Gragera"
+theme: PaperMod
+
+enableRobotsTXT: true
+buildDrafts: false
+canonifyURLs: true
+
+params:
+  env: production
+  description: "Alberto Gragera — thoughts on engineering, management, and building things"
+  keywords: [blog, engineering, management, technology]
+  author: Alberto Gragera
+  DateFormat: "January 2, 2006"
+  defaultTheme: auto
+  disableThemeToggle: false
+  ShowReadingTime: true
+  ShowShareButtons: false
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: false
+  ShowCodeCopyButtons: true
+  ShowWordCount: true
+  ShowRssButtonInSectionTermList: true
+  UseHugoToc: true
+  disableSpecial1stPost: false
+  disableScrollToTop: false
+  comments: false
+  hidemeta: false
+  hideSummary: false
+  showtoc: true
+  TocOpen: false
+
+  homeInfoParams:
+    Title: "Alberto Gragera"
+    Content: |
+      Engineering manager, builder, and human.
+      
+      I write about engineering management, teams, remote work, and building things that matter.
+
+  socialIcons:
+    - name: twitter
+      url: "https://twitter.com/gragera_"
+    - name: linkedin
+      url: "https://linkedin.com/in/gragera"
+    - name: github
+      url: "https://github.com/gragera"
+    - name: rss
+      url: "index.xml"
+
+  label:
+    text: "Gragera"
+    icon: ""
+    iconHeight: 35
+
+  cover:
+    hidden: true
+    hiddenInList: true
+    hiddenInSingle: true
+
+  fuseOpts:
+    isCaseSensitive: false
+    shouldSort: true
+    location: 0
+    distance: 1000
+    threshold: 0.4
+    minMatchCharLength: 0
+    keys: ["title", "permalink", "summary", "content"]
+
+menu:
+  main:
+    - identifier: blog
+      name: Posts
+      url: /posts/
+      weight: 10
+    - identifier: about
+      name: About
+      url: /pages/about/
+      weight: 20
+    - identifier: search
+      name: Search
+      url: /search/
+      weight: 30
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+
+permalinks:
+  posts: "/:slug/"
+  pages: "/:slug/"
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+pagination:
+  pagerSize: 5
