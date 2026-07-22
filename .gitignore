@@ -15,3 +15,6 @@ Thumbs.db
 # Python
 __pycache__/
 *.pyc
+
+# enrich.py derived cache
+catalogs/data/.tmdb_cache.json
