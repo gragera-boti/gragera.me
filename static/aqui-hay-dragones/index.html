@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aquí hay Dragones · Enciclopedia de Referencias</title>
+<meta name="description" content="Todas las películas, series, libros, cómics, canciones y videojuegos mencionados en el podcast con Arturo González-Campos, Javier Cansado, Juan Gómez-Jurado y Rodrigo Cortés.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Marcellus&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐉</text></svg>">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0806;
+    --surface: #14110e;
+    --surface-hover: #1e1a16;
+    --card: #1a1612;
+    --card-hover: #231e19;
+    --border: #2a241f;
+    --border-light: #3d352e;
+    --gold: #c9903a;
+    --gold-light: #e8b45a;
+    --gold-glow: rgba(201, 144, 58, .15);
+    --gold-dim: rgba(201, 144, 58, .08);
+    --text: #f0ede8;
+    --text-dim: #9e948a;
+    --text-muted: #6b6258;
+    --shadow-modal: 0 24px 80px rgba(0,0,0,.6);
+    --cover-shadow: 0 8px 32px rgba(0,0,0,.5);
+    --header-grad: rgba(201,144,58,.08);
+    --controls-bg: rgba(10,8,6,.92);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-display: 'Marcellus', 'Inter', serif;
+  }
+  :root[data-theme="light"] {
+    --bg: #faf7f2;
+    --surface: #fffdf9;
+    --surface-hover: #f3ede2;
+    --card: #ffffff;
+    --card-hover: #f7f2e9;
+    --border: #e6ddcf;
+    --border-light: #d4c8b4;
+    --gold: #a6702a;
+    --gold-light: #8a5c1e;
+    --gold-glow: rgba(166, 112, 42, .18);
+    --gold-dim: rgba(166, 112, 42, .10);
+    --text: #2a231b;
+    --text-dim: #6b6053;
+    --text-muted: #9a8e7c;
+    --shadow-modal: 0 24px 80px rgba(60,45,20,.25);
+    --cover-shadow: 0 8px 28px rgba(60,45,20,.18);
+    --header-grad: rgba(166,112,42,.10);
+    --controls-bg: rgba(250,247,242,.90);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.6; -webkit-font-smoothing: antialiased; min-height: 100vh;
+    margin: 0; transition: background .3s, color .3s;
+  }
+  ::selection { background: var(--gold); color: var(--bg); }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+  /* TOP BAR (theme toggle + back link) */
+  .topbar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; max-width: 1180px; margin: 0 auto;
+  }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 500;
+    padding: 6px 12px; border-radius: 20px; border: 1px solid transparent;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .back-link:hover { color: var(--text); border-color: var(--border); background: var(--surface); }
+  .theme-toggle {
+    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-dim); cursor: pointer; transition: all .15s; font-size: 16px;
+  }
+  .theme-toggle:hover { color: var(--gold); border-color: var(--gold); }
+
+  /* HEADER */
+  .header {
+    position: relative; padding: 72px 24px 48px; text-align: center;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, var(--header-grad) 0%, transparent 70%), var(--bg);
+    border-bottom: 1px solid var(--border); overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, transparent, transparent 40px, var(--gold-dim) 40px, var(--gold-dim) 41px);
+    opacity: .35; pointer-events: none;
+  }
+  .header-inner { position: relative; max-width: 720px; margin: 0 auto; }
+  .header-badge {
+    display: inline-block; padding: 4px 14px; border-radius: 20px;
+    background: var(--gold-dim); border: 1px solid var(--gold-glow);
+    color: var(--gold-light); font-size: 11px; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .header h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 400;
+    letter-spacing: -.02em; line-height: 1.15; color: var(--text);
+  }
+  .header h1 span { color: var(--gold-light); }
+  .header p {
+    margin-top: 12px; color: var(--text-dim); font-size: 16px; line-height: 1.5;
+    max-width: 560px; margin-left: auto; margin-right: auto;
+  }
+
+  /* STATS */
+  .stats-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 28px; padding: 0 8px; }
+  .stat {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: var(--radius-sm);
+    background: var(--surface); border: 1px solid var(--border);
+    font-size: 13px; color: var(--text-dim);
+  }
+  .stat strong { font-size: 15px; font-weight: 700; color: var(--text); }
+  .stat .emoji { font-size: 16px; }
+
+  /* CONTROLS */
+  .controls {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--controls-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border); padding: 16px 24px;
+  }
+  .controls-inner { max-width: 1100px; margin: 0 auto; }
+  .search-row { display: flex; gap: 12px; align-items: center; }
+  .search-wrap { flex: 1; position: relative; }
+  .search-wrap svg {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; color: var(--text-muted); pointer-events: none;
+  }
+  .search-wrap input {
+    width: 100%; padding: 12px 14px 12px 44px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-size: 15px; font-family: inherit; outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  .search-wrap input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow); }
+  .search-wrap input::placeholder { color: var(--text-muted); }
+  .result-count { font-size: 13px; color: var(--text-muted); white-space: nowrap; min-width: 90px; text-align: right; }
+  .result-count strong { color: var(--gold-light); }
+
+  /* FILTER PILLS */
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .filter-pill {
+    padding: 5px 14px; border-radius: 20px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-dim); font-size: 12px; font-weight: 500;
+    font-family: inherit; cursor: pointer;
+    display: flex; align-items: center; gap: 4px; transition: all .15s;
+  }
+  .filter-pill:hover { border-color: var(--border-light); color: var(--text); }
+  .filter-pill.active { background: var(--gold-dim); border-color: var(--gold-glow); color: var(--gold-light); }
+  .filter-pill .count { font-size: 10px; opacity: .6; font-weight: 400; }
+  .filter-pill-all { font-weight: 600; }
+
+  /* EPISODE LIST */
+  .episodes-wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  .episodes-list { display: flex; flex-direction: column; gap: 8px; }
+  .episode-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .episode-card.hidden { display: none; }
+  .episode-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; cursor: pointer; user-select: none; }
+  .episode-header:hover { background: var(--surface-hover); }
+  .episode-number {
+    min-width: 44px; height: 44px; padding: 0 6px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--radius-sm);
+    background: var(--gold-dim); border: 1px solid var(--gold-glow);
+    font-size: 13px; font-weight: 700; color: var(--gold-light); flex-shrink: 0;
+  }
+  .episode-title { flex: 1; font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .episode-meta { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .episode-toggle { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); flex-shrink: 0; transition: transform .3s, color .15s; }
+  .episode-card.open .episode-toggle { color: var(--gold); transform: rotate(180deg); }
+  .episode-body { overflow: hidden; max-height: 0; transition: max-height .35s ease; }
+  .episode-card.open .episode-body { max-height: none; padding: 0 20px 20px; }
+  /* When searching, everything is expanded and non-collapsible */
+  .episodes-list.searching .episode-body { max-height: none; padding: 0 20px 20px; }
+  .episodes-list.searching .episode-toggle { display: none; }
+  .episodes-list.searching .episode-header { cursor: default; }
+  .episodes-list.searching .episode-header:hover { background: transparent; }
+
+  /* REFERENCE GRID */
+  .refs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 8px; padding-top: 4px; }
+  .ref-chip {
+    display: flex; align-items: center; gap: 18px;
+    padding: 16px 18px; border-radius: var(--radius);
+    background: var(--surface); border: 1px solid var(--border);
+    cursor: pointer; color: inherit; text-align: left;
+    transition: background .15s, border-color .15s, transform .15s;
+  }
+  .ref-chip:hover { background: var(--surface-hover); border-color: var(--border-light); transform: translateY(-1px); }
+  .ref-cover-wrap {
+    flex-shrink: 0; width: 88px; height: 120px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px; overflow: hidden; position: relative; background: var(--card);
+  }
+  .ref-cover { width: 88px; height: 120px; object-fit: cover; display: block; border-radius: 5px; }
+  .ref-cat-badge {
+    position: absolute; top: -2px; left: -2px;
+    font-size: 13px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 4px;
+    padding: 2px 4px; line-height: 1; box-shadow: 0 1px 3px rgba(0,0,0,.5);
+  }
+  .ref-info { flex: 1; min-width: 0; }
+  .ref-title {
+    font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .ref-author { font-size: 13px; color: var(--text-muted); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ref-desc {
+    font-size: 11px; color: var(--text-muted); margin-top: 2px; opacity: .7; line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .ref-click-icon {
+    flex-shrink: 0; width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; background: var(--gold-dim); color: var(--gold);
+    opacity: 0; transition: opacity .15s;
+  }
+  .ref-chip:hover .ref-click-icon { opacity: 1; }
+  .ref-click-icon svg { width: 16px; height: 16px; }
+
+  /* EMPTY / LOADING */
+  .empty-state { text-align: center; padding: 60px 24px; color: var(--text-muted); }
+  .empty-state .big-emoji { font-size: 48px; display: block; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 18px; color: var(--text-dim); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; }
+  .loading-state { text-align: center; padding: 80px 24px; }
+  .loader { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay.hidden { display: none !important; }
+  .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.8); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .modal-content {
+    position: relative; z-index: 1; background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto;
+    box-shadow: var(--shadow-modal); animation: modalIn .3s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: scale(.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  .modal-close {
+    position: absolute; top: 12px; right: 16px; background: none; border: none;
+    color: var(--text-muted); font-size: 28px; cursor: pointer; z-index: 2;
+    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; transition: background .15s, color .15s;
+  }
+  .modal-close:hover { background: var(--surface-hover); color: var(--text); }
+  .modal-main { display: flex; gap: 28px; padding: 32px; }
+  .modal-cover-wrap { flex-shrink: 0; width: 200px; position: relative; }
+  .modal-cover { width: 200px; height: 280px; object-fit: cover; border-radius: 10px; display: block; background: var(--surface); box-shadow: var(--cover-shadow); }
+  .modal-cover-placeholder { width: 200px; height: 280px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--surface); border: 1px solid var(--border); font-size: 64px; }
+  .modal-cat-badge { position: absolute; top: -6px; left: -6px; font-size: 18px; background: var(--bg); border: 2px solid var(--gold); border-radius: 8px; padding: 4px 8px; line-height: 1; box-shadow: 0 2px 8px rgba(0,0,0,.6); }
+  .modal-info { flex: 1; min-width: 0; }
+  .modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 400; color: var(--text); line-height: 1.3; margin-bottom: 4px; }
+  .modal-author { font-size: 15px; color: var(--gold-light); margin-bottom: 16px; }
+  .modal-desc { font-size: 14px; color: var(--text-dim); line-height: 1.7; margin-bottom: 20px; }
+  .modal-desc:empty { display: none; }
+  .modal-meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding-top: 16px; border-top: 1px solid var(--border); }
+  .modal-episode { font-size: 13px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; }
+  .modal-amazon-btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px;
+    background: linear-gradient(135deg, #f90, #e67e22); color: #fff; font-size: 14px; font-weight: 600;
+    text-decoration: none; border: none; cursor: pointer; transition: transform .15s, box-shadow .15s;
+  }
+  .modal-amazon-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,153,0,.35); }
+  .modal-nav { display: flex; gap: 8px; margin-left: auto; }
+  .modal-nav-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text-dim); font-size: 16px; cursor: pointer; transition: all .15s; }
+  .modal-nav-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .modal-nav-btn:disabled { opacity: .3; cursor: default; }
+  .modal-nav-btn:disabled:hover { border-color: var(--border); color: var(--text-dim); }
+  .modal-related { border-top: 1px solid var(--border); padding: 24px 32px 32px; }
+  .modal-related h3 { font-family: var(--font-display); font-size: 16px; font-weight: 400; color: var(--text-dim); margin-bottom: 14px; }
+  .modal-related h3 span { color: var(--gold-light); }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+  .related-chip { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); cursor: pointer; transition: all .15s; color: inherit; text-decoration: none; }
+  .related-chip:hover { background: var(--surface-hover); border-color: var(--border-light); }
+  .related-cover { width: 40px; height: 56px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+  .related-info { flex: 1; min-width: 0; }
+  .related-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .related-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* FOOTER */
+  .footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 13px; }
+  .footer a { color: var(--gold); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 768px) {
+    .header { padding: 56px 16px 36px; }
+    .controls { padding: 12px 16px; }
+    .episodes-wrap { padding: 16px; }
+    .search-row { flex-wrap: wrap; }
+    .result-count { text-align: left; min-width: auto; width: 100%; }
+    .refs-grid { grid-template-columns: 1fr; }
+    .episode-number { min-width: 36px; height: 36px; font-size: 11px; }
+    .episode-header { padding: 12px 14px; }
+    .episode-title { font-size: 14px; }
+    .stats-bar { gap: 6px; }
+    .stat { padding: 6px 12px; font-size: 12px; }
+    .filters { gap: 4px; }
+    .filter-pill { padding: 4px 10px; font-size: 11px; }
+    .modal-main { flex-direction: column; align-items: center; padding: 24px; }
+    .modal-cover-wrap { width: 140px; }
+    .modal-cover { width: 140px; height: 196px; }
+    .modal-cover-placeholder { width: 140px; height: 196px; font-size: 48px; }
+    .modal-title { font-size: 20px; text-align: center; }
+    .modal-author { text-align: center; }
+    .modal-related { padding: 20px 24px 28px; }
+    .related-grid { grid-template-columns: 1fr; }
+    .modal-nav { margin-left: 0; }
+    .modal-meta { justify-content: center; }
+  }
+  @media (max-width: 480px) {
+    .stats-bar .stat-hidden-mobile { display: none; }
+    .ref-cover { width: 64px; height: 88px; }
+    .ref-cover-wrap { width: 64px; height: 88px; }
+    .modal-overlay { padding: 12px; }
+    .modal-main { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back-link" href="https://gragera.me/">&larr; gragera.me</a>
+  <button class="theme-toggle" id="theme-toggle" title="Cambiar tema" aria-label="Cambiar tema">◐</button>
+</div>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-badge">Podcast</div>
+    <h1>Aquí hay Dragones<br><span>Enciclopedia de Referencias</span></h1>
+    <p>Todas las películas, series, libros, cómics, canciones y videojuegos mencionados en el podcast con Arturo González-Campos, Javier Cansado, Juan Gómez-Jurado y Rodrigo Cortés.</p>
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat"><strong id="stat-episodes">—</strong> episodios</div>
+      <div class="stat"><strong id="stat-refs">—</strong> referencias</div>
+      <div class="stat stat-hidden-mobile"><span class="emoji">🎬</span><strong id="stat-film">—</strong></div>
+      <div class="stat stat-hidden-mobile"><span class="emoji">📺</span><strong id="stat-tv">—</strong></div>
+      <div class="stat stat-hidden-mobile"><span class="emoji">📚</span><strong id="stat-book">—</strong></div>
+      <div class="stat stat-hidden-mobile"><span class="emoji">📖</span><strong id="stat-comic">—</strong></div>
+      <div class="stat stat-hidden-mobile"><span class="emoji">🎵</span><strong id="stat-music">—</strong></div>
+      <div class="stat stat-hidden-mobile"><span class="emoji">🎮</span><strong id="stat-games">—</strong></div>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-row">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search-input" placeholder="Buscar película, libro, autor, episodio…" autocomplete="off">
+      </div>
+      <span class="result-count" id="result-count"></span>
+    </div>
+    <div class="filters" id="filters"></div>
+  </div>
+</div>
+
+<div class="episodes-wrap">
+  <div id="loading" class="loading-state">
+    <div class="loader"></div>
+    <p>Cargando archivo de referencias…</p>
+  </div>
+  <div id="episodes-list" class="episodes-list" style="display:none"></div>
+  <div id="empty-state" class="empty-state" style="display:none">
+    <span class="big-emoji">🔍</span>
+    <h3>No se encontraron resultados</h3>
+    <p>Prueba con otro término o limpia los filtros.</p>
+  </div>
+</div>
+
+<!-- ===== DETAIL MODAL ===== -->
+<div id="detail-modal" class="modal-overlay hidden">
+  <div class="modal-backdrop" id="modal-backdrop"></div>
+  <div class="modal-content">
+    <button class="modal-close" id="modal-close">&times;</button>
+    <div class="modal-main">
+      <div class="modal-cover-wrap">
+        <div id="modal-cover-placeholder" class="modal-cover-placeholder" style="display:none"></div>
+        <img id="modal-cover" class="modal-cover" src="" alt="" style="display:none">
+        <span id="modal-cat-badge" class="modal-cat-badge"></span>
+      </div>
+      <div class="modal-info">
+        <h2 id="modal-title" class="modal-title"></h2>
+        <p id="modal-author" class="modal-author"></p>
+        <p id="modal-desc" class="modal-desc"></p>
+        <div class="modal-meta">
+          <span id="modal-episode" class="modal-episode"></span>
+          <a id="modal-amazon" href="#" target="_blank" rel="noopener" class="modal-amazon-btn">🛒 Ver en Amazon</a>
+          <div class="modal-nav">
+            <button id="modal-prev" class="modal-nav-btn" title="Anterior">◀</button>
+            <button id="modal-next" class="modal-nav-btn" title="Siguiente">▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-related" id="modal-related-section" style="display:none">
+      <h3>Más de <span id="related-author-name"></span></h3>
+      <div id="related-items" class="related-grid"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <p>
+    Datos extraídos de <a href="https://www.ivoox.com/podcast-aqui-hay-dragones_sq_f1900735_1.html" target="_blank" rel="noopener">Aquí hay Dragones</a> ·
+    Los enlaces incluyen <a href="https://afiliados.amazon.es" target="_blank" rel="noopener">tag de afiliado</a> ·
+    Creado por <a href="https://gragera.me" target="_blank" rel="noopener">Boti</a>
+  </p>
+</footer>
+
+<script>
+window.CATALOG_CONFIG = {"epNumRe": "AHD\\s*(\\d+)", "epNumPrefix": "", "epStripRe": "^AHD\\s*\\d+\\s*[-–—]\\s*", "epBonusLabel": "Bonus"};
+</script>
+<script>
+(function(){
+  'use strict';
+
+  var CFG = window.CATALOG_CONFIG || {};
+
+  // ===== THEME =====
+  (function initTheme(){
+    var stored = null;
+    try { stored = localStorage.getItem('catalog-theme'); } catch(e){}
+    var theme = stored || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+    document.addEventListener('DOMContentLoaded', function(){
+      var btn = document.getElementById('theme-toggle');
+      if (!btn) return;
+      btn.addEventListener('click', function(){
+        var cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', cur);
+        try { localStorage.setItem('catalog-theme', cur); } catch(e){}
+      });
+    });
+  })();
+
+  // ===== CONFIG =====
+  var CATEGORIES = [
+    { emoji: '🎬', label: 'Cine' },
+    { emoji: '📺', label: 'TV' },
+    { emoji: '📚', label: 'Libros' },
+    { emoji: '📖', label: 'Cómics' },
+    { emoji: '🎵', label: 'Música' },
+    { emoji: '🎮', label: 'Videojuegos' },
+  ];
+  var CAT_EMOJIS = CATEGORIES.map(function(c){ return c.emoji; });
+  var CAT_LABELS = {};
+  CATEGORIES.forEach(function(c){ CAT_LABELS[c.emoji] = c.label; });
+
+  var EP_NUM_RE = new RegExp(CFG.epNumRe || '#(\\d+)');
+  var EP_NUM_PREFIX = CFG.epNumPrefix != null ? CFG.epNumPrefix : '#';
+  var EP_STRIP_RE = CFG.epStripRe ? new RegExp(CFG.epStripRe, 'i') : null;
+  var EP_BONUS_LABEL = CFG.epBonusLabel || 'Bonus';
+
+  // ===== STATE =====
+  var data = null;
+  var query = '';
+  var activeCats = new Set(CAT_EMOJIS);
+  var flatRefs = [];   // flattened refs of the CURRENT filtered view (drives prev/next)
+  var currentIdx = -1;
+
+  // ===== DOM =====
+  var $ = function(id){ return document.getElementById(id); };
+  var listEl = $('episodes-list');
+  var emptyEl = $('empty-state');
+  var loadingEl = $('loading');
+  var inputEl = $('search-input');
+  var filtersEl = $('filters');
+  var countEl = $('result-count');
+  var modal = $('detail-modal');
+  var modalBackdrop = $('modal-backdrop');
+  var modalClose = $('modal-close');
+  var modalCover = $('modal-cover');
+  var modalCoverPlaceholder = $('modal-cover-placeholder');
+  var modalCatBadge = $('modal-cat-badge');
+  var modalTitle = $('modal-title');
+  var modalAuthor = $('modal-author');
+  var modalDesc = $('modal-desc');
+  var modalEpisode = $('modal-episode');
+  var modalAmazon = $('modal-amazon');
+  var modalPrev = $('modal-prev');
+  var modalNext = $('modal-next');
+  var modalRelated = $('modal-related-section');
+  var relatedAuthorName = $('related-author-name');
+  var relatedItems = $('related-items');
+
+  // ===== HELPERS =====
+  function esc(s){ if(!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+  function norm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+  function epNum(title){ var m = title.match(EP_NUM_RE); return m ? (EP_NUM_PREFIX + m[1]) : EP_BONUS_LABEL; }
+  function epSortKey(title){ var m = title.match(EP_NUM_RE); return m ? parseInt(m[1],10) : 0; }
+  function epDisplay(title){ var t = EP_STRIP_RE ? title.replace(EP_STRIP_RE, '') : title; return t.trim() || title; }
+  function catLabel(emoji){ return CAT_LABELS[emoji] || emoji; }
+  function cleanTitle(t){ return t.replace(/\s*\(.*?\)\s*$/, '').trim(); }
+  function refImage(r){ return r.image || r.cover || ''; }
+
+  // ===== FETCH =====
+  function load(){
+    fetch('referencias.json?_t=' + Date.now()).then(function(r){
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function(json){
+      data = json;
+      loadingEl.style.display = 'none';
+      listEl.style.display = 'block';
+      init();
+    }).catch(function(e){
+      loadingEl.innerHTML = '<span style="font-size:32px;display:block;margin-bottom:12px">⚠️</span><p style="color:var(--text-dim)">Error al cargar datos: ' + esc(e.message) + '</p>';
+    });
+  }
+
+  // ===== INIT =====
+  function init(){
+    updateStats();
+    buildFilters();
+    render();
+    inputEl.addEventListener('input', function(){ query = norm(this.value.trim()); render(); });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') closeModal();
+      if (modal.classList.contains('hidden')) return;
+      if (e.key === 'ArrowLeft'){ e.preventDefault(); navModal(-1); }
+      if (e.key === 'ArrowRight'){ e.preventDefault(); navModal(1); }
+    });
+    window.addEventListener('popstate', function(){ openFromHash(); });
+    openFromHash();
+  }
+
+  // ===== STATS =====
+  function updateStats(){
+    var allRefs = data.episodes.reduce(function(a,e){ return a.concat(e.references); }, []);
+    $('stat-episodes').textContent = data.episodes.length;
+    $('stat-refs').textContent = allRefs.length.toLocaleString();
+    var map = { film:'🎬', tv:'📺', book:'📚', comic:'📖', music:'🎵', games:'🎮' };
+    Object.keys(map).forEach(function(key){
+      var el = $('stat-' + key);
+      if (el) el.textContent = allRefs.filter(function(r){ return r.category === map[key]; }).length.toLocaleString();
+    });
+  }
+
+  // ===== FILTERS =====
+  function buildFilters(){
+    var allRefs = data.episodes.reduce(function(a,e){ return a.concat(e.references); }, []);
+    var html = '<button class="filter-pill filter-pill-all active" data-cat="ALL">Todos <span class="count">' + allRefs.length.toLocaleString() + '</span></button>';
+    CATEGORIES.forEach(function(cat){
+      var count = allRefs.filter(function(r){ return r.category === cat.emoji; }).length;
+      if (!count) return;
+      html += '<button class="filter-pill active" data-cat="' + cat.emoji + '">' + cat.emoji + ' ' + cat.label + ' <span class="count">' + count.toLocaleString() + '</span></button>';
+    });
+    filtersEl.innerHTML = html;
+  }
+
+  function onFilterClick(e){
+    var btn = e.target.closest('.filter-pill');
+    if (!btn) return;
+    var cat = btn.dataset.cat;
+    if (cat === 'ALL'){
+      if (btn.classList.contains('active')) return;
+      filtersEl.querySelectorAll('.filter-pill').forEach(function(b){ b.classList.add('active'); });
+      activeCats = new Set(CAT_EMOJIS);
+    } else {
+      btn.classList.toggle('active');
+      filtersEl.querySelector('[data-cat="ALL"]').classList.remove('active');
+      activeCats = new Set();
+      filtersEl.querySelectorAll('.filter-pill.active').forEach(function(b){
+        if (b.dataset.cat !== 'ALL') activeCats.add(b.dataset.cat);
+      });
+      if (activeCats.size === 0){
+        filtersEl.querySelector('[data-cat="ALL"]').classList.add('active');
+        filtersEl.querySelectorAll('.filter-pill').forEach(function(b){ b.classList.add('active'); });
+        activeCats = new Set(CAT_EMOJIS);
+      } else if (activeCats.size === CAT_EMOJIS.length){
+        filtersEl.querySelector('[data-cat="ALL"]').classList.add('active');
+      }
+    }
+    render();
+  }
+
+  // ===== EPISODE TOGGLE =====
+  function onListClick(e){
+    if (!listEl.classList.contains('searching')){
+      var header = e.target.closest('.episode-header');
+      if (header){
+        var card = header.closest('.episode-card');
+        if (!card) return;
+        if (!card.classList.contains('open')){
+          listEl.querySelectorAll('.episode-card.open').forEach(function(oc){
+            oc.classList.remove('open');
+            var ob = oc.querySelector('.episode-body'); if (ob) ob.style.maxHeight = '0';
+          });
+        }
+        card.classList.toggle('open');
+        var body = card.querySelector('.episode-body');
+        body.style.maxHeight = card.classList.contains('open') ? (body.scrollHeight + 'px') : '0';
+        return;
+      }
+    }
+    var chip = e.target.closest('.ref-chip');
+    if (chip){
+      var rid = parseInt(chip.dataset.id, 10);
+      if (!isNaN(rid)) openModal(rid);
+    }
+  }
+
+  // ===== FILTERING =====
+  function refMatches(r){
+    if (activeCats.size < CAT_EMOJIS.length && !activeCats.has(r.category)) return false;
+    if (query){
+      if (norm(r.title).indexOf(query) === -1 && norm(r.author).indexOf(query) === -1) return false;
+    }
+    return true;
+  }
+
+  function filteredEpisodes(){
+    if (!data) return [];
+    var eps = data.episodes.map(function(e){
+      var epMatch = query && norm(e.episode).indexOf(query) !== -1;
+      var refs = e.references.filter(function(r){
+        if (activeCats.size < CAT_EMOJIS.length && !activeCats.has(r.category)) return false;
+        if (query && !epMatch){
+          if (norm(r.title).indexOf(query) === -1 && norm(r.author).indexOf(query) === -1) return false;
+        }
+        return true;
+      });
+      return { episode: e.episode, references: refs };
+    }).filter(function(e){ return e.references.length > 0; });
+    eps.sort(function(a,b){ return epSortKey(b.episode) - epSortKey(a.episode); });
+    return eps;
+  }
+
+  // ===== RENDER =====
+  function render(){
+    var searching = !!query;
+    listEl.classList.toggle('searching', searching);
+
+    var filtered = filteredEpisodes();
+    var totalRefs = filtered.reduce(function(s,e){ return s + e.references.length; }, 0);
+
+    // Rebuild flat list (drives modal prev/next in display order)
+    flatRefs = [];
+    filtered.forEach(function(ep){
+      ep.references.forEach(function(r){ flatRefs.push({ ref: r, epTitle: ep.episode }); });
+    });
+
+    countEl.innerHTML = totalRefs
+      ? '<strong>' + totalRefs.toLocaleString() + '</strong> en <strong>' + filtered.length + '</strong> episodio' + (filtered.length !== 1 ? 's' : '')
+      : '0 resultados';
+
+    if (!filtered.length){
+      listEl.innerHTML = '';
+      emptyEl.style.display = 'block';
+      return;
+    }
+    emptyEl.style.display = 'none';
+
+    var html = '';
+    filtered.forEach(function(ep){
+      var refs = ep.references;
+      html += '<div class="episode-card' + (searching ? ' open' : '') + '" data-title="' + esc(ep.episode) + '">'
+        + '<div class="episode-header">'
+          + '<div class="episode-number">' + epNum(ep.episode) + '</div>'
+          + '<div class="episode-title">' + esc(epDisplay(ep.episode)) + '</div>'
+          + '<div class="episode-meta">' + refs.length + ' ref' + (refs.length !== 1 ? 's' : '') + '</div>'
+          + '<div class="episode-toggle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>'
+        + '</div>'
+        + '<div class="episode-body">'
+          + '<div class="refs-grid">' + refs.map(refChip).join('') + '</div>'
+        + '</div>'
+      + '</div>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  function refChip(ref){
+    var title = cleanTitle(ref.title);
+    var cat = ref.category || '📄';
+    var img = refImage(ref);
+    var coverHtml = img
+      ? '<img class="ref-cover" src="' + esc(img) + '" alt="" loading="lazy"><span class="ref-cat-badge">' + cat + '</span>'
+      : '<span style="font-size:32px">' + cat + '</span>';
+    return '<button class="ref-chip" type="button" data-id="' + ref.id + '">'
+      + '<span class="ref-cover-wrap">' + coverHtml + '</span>'
+      + '<span class="ref-info">'
+        + '<span class="ref-title">' + esc(title) + '</span>'
+        + (ref.author ? '<span class="ref-author">' + esc(ref.author) + '</span>' : '')
+        + (ref.desc ? '<span class="ref-desc">' + esc(ref.desc) + '</span>' : '')
+      + '</span>'
+      + '<span class="ref-click-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>'
+    + '</button>';
+  }
+
+  // ===== MODAL =====
+  function openModal(refId, fromHash){
+    var idx = flatRefs.findIndex(function(f){ return f.ref.id === refId; });
+    if (idx === -1){
+      // Ref not in current view (e.g. deep link or related from other category): search all
+      flatRefs = [];
+      data.episodes.forEach(function(ep){
+        ep.references.forEach(function(r){ flatRefs.push({ ref: r, epTitle: ep.episode }); });
+      });
+      idx = flatRefs.findIndex(function(f){ return f.ref.id === refId; });
+      if (idx === -1) return;
+    }
+    currentIdx = idx;
+    renderModal();
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    if (!fromHash){
+      try { history.pushState({ ref: refId }, '', '#ref-' + refId); } catch(e){}
+    }
+  }
+
+  function closeModal(){
+    if (modal.classList.contains('hidden')) return;
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    currentIdx = -1;
+    if (location.hash.indexOf('#ref-') === 0){
+      try { history.pushState('', '', location.pathname + location.search); } catch(e){}
+    }
+  }
+
+  function navModal(dir){
+    var n = currentIdx + dir;
+    if (n < 0 || n >= flatRefs.length) return;
+    currentIdx = n;
+    renderModal();
+    var id = flatRefs[n].ref.id;
+    try { history.replaceState({ ref: id }, '', '#ref-' + id); } catch(e){}
+  }
+
+  function openFromHash(){
+    var m = location.hash.match(/^#ref-(\d+)$/);
+    if (m){ openModal(parseInt(m[1],10), true); }
+    else { if (!modal.classList.contains('hidden')) closeModal(); }
+  }
+
+  function renderModal(){
+    var item = flatRefs[currentIdx];
+    if (!item) return;
+    var ref = item.ref;
+    var img = refImage(ref);
+    if (img){
+      modalCover.src = img; modalCover.style.display = 'block'; modalCoverPlaceholder.style.display = 'none';
+    } else {
+      modalCover.style.display = 'none'; modalCoverPlaceholder.style.display = 'flex'; modalCoverPlaceholder.textContent = ref.category;
+    }
+    modalCatBadge.textContent = ref.category + ' ' + catLabel(ref.category);
+    modalTitle.textContent = cleanTitle(ref.title);
+    modalAuthor.textContent = ref.author || '';
+    modalAuthor.style.display = ref.author ? '' : 'none';
+    modalDesc.textContent = ref.desc || '';
+    modalDesc.style.display = ref.desc ? '' : 'none';
+    modalEpisode.textContent = epNum(item.epTitle) + ' · ' + epDisplay(item.epTitle);
+    if (ref.amazon_url && ref.amazon_url !== '#'){
+      modalAmazon.href = ref.amazon_url; modalAmazon.style.display = '';
+    } else {
+      modalAmazon.href = '#'; modalAmazon.style.display = 'none';
+    }
+    modalPrev.disabled = currentIdx <= 0;
+    modalNext.disabled = currentIdx >= flatRefs.length - 1;
+    modal.querySelector('.modal-content').scrollTop = 0;
+    renderRelated(ref);
+  }
+
+  function renderRelated(ref){
+    if (!ref.author){ modalRelated.style.display = 'none'; return; }
+    var seen = new Set();
+    var all = data.episodes.reduce(function(a,e){
+      e.references.forEach(function(r){ a.push({ ref: r, epTitle: e.episode }); });
+      return a;
+    }, []);
+    var sameAuthor = all.filter(function(f){
+      if (!f.ref.author || f.ref.author !== ref.author || f.ref.id === ref.id) return false;
+      var key = f.ref.title + '|' + f.ref.category;
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+    if (!sameAuthor.length){ modalRelated.style.display = 'none'; return; }
+    modalRelated.style.display = 'block';
+    relatedAuthorName.textContent = ref.author;
+    var maxShow = 8;
+    var show = sameAuthor.slice(0, maxShow);
+    var html = '';
+    show.forEach(function(f){
+      var r = f.ref;
+      var title = cleanTitle(r.title);
+      var img = refImage(r);
+      var coverHtml = img
+        ? '<img class="related-cover" src="' + esc(img) + '" alt="" loading="lazy">'
+        : '<div class="related-cover" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--card)">' + r.category + '</div>';
+      html += '<div class="related-chip" data-id="' + r.id + '">' + coverHtml
+        + '<span class="related-info">'
+          + '<span class="related-title">' + esc(title) + '</span>'
+          + '<span class="related-meta">' + r.category + ' · ' + epNum(f.epTitle) + '</span>'
+        + '</span></div>';
+    });
+    if (sameAuthor.length > maxShow){
+      html += '<div style="color:var(--text-muted);font-size:12px;padding:8px;text-align:center">… y ' + (sameAuthor.length - maxShow) + ' más</div>';
+    }
+    relatedItems.innerHTML = html;
+  }
+
+  // ===== EVENTS =====
+  modalBackdrop.addEventListener('click', closeModal);
+  modalClose.addEventListener('click', closeModal);
+  modalPrev.addEventListener('click', function(){ navModal(-1); });
+  modalNext.addEventListener('click', function(){ navModal(1); });
+  relatedItems.addEventListener('click', function(e){
+    var chip = e.target.closest('.related-chip');
+    if (chip){ var rid = parseInt(chip.dataset.id, 10); if (!isNaN(rid)) openModal(rid); }
+  });
+  filtersEl.addEventListener('click', onFilterClick);
+  listEl.addEventListener('click', onListClick);
+
+  load();
+})();
+</script>
+</body>
+</html>

@@ -73,14 +73,18 @@ menu:
       name: Posts
       url: /posts/
       weight: 10
+    - identifier: referencias
+      name: Referencias
+      url: /referencias/
+      weight: 20
     - identifier: about
       name: About
-      url: /pages/about/
-      weight: 20
+      url: /about-this-site/
+      weight: 30
     - identifier: search
       name: Search
       url: /search/
-      weight: 30
+      weight: 40
 
 markup:
   goldmark:
