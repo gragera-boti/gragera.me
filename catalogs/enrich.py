@@ -72,11 +72,15 @@ def http_json(url, headers=None):
             if e.code == 404:
                 return None, "notfound"
             if e.code in (403, 429):
-                if "dailyLimitExceeded" in body:
+                if "dailyLimitExceeded" in body or "per day" in body.lower():
                     return None, "daily"
+                if attempt == 4:
+                    return None, "ratelimit"       # exhausted → stop, don't cache a miss
                 time.sleep(2 * (attempt + 1))
                 continue
             if e.code in (500, 502, 503, 504):     # transient server/throttle blips
+                if attempt == 4:
+                    return None, "ratelimit"
                 time.sleep(2 * (attempt + 1))
                 continue
             if e.code in (401,):
@@ -241,7 +245,7 @@ def gbooks_search(title, author, lang, key):
     if lang:
         params["langRestrict"] = lang
     data, reason = http_json(GBOOKS_API + "?" + urllib.parse.urlencode(params))
-    if reason == "daily":
+    if reason in ("daily", "ratelimit"):       # throttled → stop; never cache a false miss
         raise DailyQuota()
     return (data or {}).get("items", []) or []
 
@@ -314,16 +318,15 @@ def gbooks_lookup(title, author):
     """Shared Google Books match (Spanish-first). Returns result dict or None."""
     key = books_key()
     chosen, chosen_conf = None, None
+    # Spanish first, accept on match to save quota; only fall back to a global
+    # search when the Spanish query found nothing at all.
     for lang in ("es", None):
         items = gbooks_search(title, author, lang, key)
         time.sleep(0.05)
         vi, conf = pick_book(items, title, author)
         if vi:
-            if chosen is None:
-                chosen, chosen_conf = vi, conf
-            if vi.get("description"):          # prefer a match that has a synopsis
-                chosen, chosen_conf = vi, conf
-                break
+            chosen, chosen_conf = vi, conf
+            break
     if chosen is None:
         return None
     isbn = isbn_of(chosen)
@@ -381,7 +384,7 @@ def cv_search(title, key):
         sc = (data or {}).get("status_code")
         if sc == 100:
             sys.exit("Comic Vine: invalid API key (status 100).")
-        if reason == "daily" or sc == 107:      # rate limit
+        if reason in ("daily", "ratelimit") or sc == 107:      # rate limit
             if attempt < 3:
                 time.sleep(30 * (attempt + 1))
                 continue
