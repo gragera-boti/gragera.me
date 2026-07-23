@@ -76,6 +76,9 @@ def http_json(url, headers=None):
                     return None, "daily"
                 time.sleep(2 * (attempt + 1))
                 continue
+            if e.code in (500, 502, 503, 504):     # transient server/throttle blips
+                time.sleep(2 * (attempt + 1))
+                continue
             if e.code in (401,):
                 sys.exit(f"Auth failed (HTTP {e.code}) for {url.split('?')[0]}")
             time.sleep(1)

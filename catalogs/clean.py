@@ -80,6 +80,26 @@ def reason_to_remove(r, author_set):
     return None
 
 
+# A re-mention the extractor emitted as a separate entry: "(otra/tercera/…
+# versión)" or "(reprise)". NOT "(versión 2023)" (a real remake — year kept).
+VER_RE = re.compile(
+    r"\s*\((?:otra|segunda|tercera|cuarta|quinta|sexta|s[eé]ptima|octava|novena|"
+    r"d[eé]cima|nueva|[uú]ltima|\d+[ªa]?)?\s*versi[oó]n\)\s*$", re.I)
+REPRISE_RE = re.compile(r"\s*\(reprise\)\s*$", re.I)
+
+
+def canonical_title(title):
+    """Strip re-mention suffixes and the artificial 'El cuento de ' prefix."""
+    t = REPRISE_RE.sub("", VER_RE.sub("", title)).strip()
+    # 'El cuento de Barba Azul' → 'Barba Azul', but only when it's clearly the
+    # extractor's prefix on a proper title: next word capitalised and no year
+    # (protects real titles like 'El cuento de la criada (1985)').
+    m = re.match(r"^[Ee]l cuento de\s+(.+)$", t)
+    if m and m.group(1)[:1].isupper() and not re.search(r"\(\d{4}\)", t):
+        t = m.group(1).strip()
+    return t or title
+
+
 def process(slug, apply):
     path = os.path.join(DATA_DIR, f"{slug}.json")
     with open(path, encoding="utf-8") as f:
@@ -89,8 +109,8 @@ def process(slug, apply):
     author_set.discard("")
 
     counts = Counter()
-    samples = {"concept": [], "person": []}
-    kept = 0
+    samples = {"concept": [], "person": [], "dedup": []}
+    kept = deduped = retitled = 0
     for ep in data["episodes"]:
         keep = []
         for r in ep["references"]:
@@ -101,18 +121,36 @@ def process(slug, apply):
                     samples[why].append(f"{r.get('title','')} | {r.get('author','')}")
             else:
                 keep.append(r)
-        kept += len(keep)
+        # collapse re-mentions + canonicalise titles, within the episode
+        seen, out = set(), []
+        for r in keep:
+            ct = canonical_title(r.get("title", ""))
+            k = (norm(ct), norm(r.get("author", "")), r.get("category", ""))
+            if k in seen:
+                deduped += 1
+                if len(samples["dedup"]) < 15:
+                    samples["dedup"].append(f"{r.get('title','')} → (dup of {ct!r})")
+                continue
+            seen.add(k)
+            if ct != r.get("title", ""):
+                retitled += 1
+                if apply:
+                    r["title"] = ct
+            out.append(r)
+        kept += len(out)
         if apply:
-            ep["references"] = keep
+            ep["references"] = out
 
     total = len(refs)
     removed = counts["concept"] + counts["person"]
     print(f"\n=== {slug}: {total} refs → remove {removed} "
-          f"(concept {counts['concept']}, person {counts['person']}), keep {kept} ===")
-    for why in ("concept", "person"):
-        print(f"  [{why}] examples:")
-        for s in samples[why][:12]:
-            print(f"     - {s}")
+          f"(concept {counts['concept']}, person {counts['person']}), "
+          f"dedup {deduped}, retitle {retitled}, keep {kept} ===")
+    for why in ("concept", "person", "dedup"):
+        if samples[why]:
+            print(f"  [{why}] examples:")
+            for s in samples[why][:10]:
+                print(f"     - {s}")
 
     if apply:
         data["total_references"] = kept
