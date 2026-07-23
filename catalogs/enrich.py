@@ -93,7 +93,8 @@ def norm(s):
 
 
 def strip_parens(raw):
-    return (re.sub(r"\s*\(.*?\)\s*$", "", raw).strip() or raw).strip()
+    s = (re.sub(r"\s*\(.*?\)\s*$", "", raw).strip() or raw)
+    return s.strip().strip('"“”\'').strip()          # also drop wrapping quotes
 
 
 def parse_year(raw):
