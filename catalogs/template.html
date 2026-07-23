@@ -469,7 +469,7 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
   // ===== STATE =====
   var data = null;
   var query = '';
-  var activeCats = new Set(CAT_EMOJIS);
+  var activeCats = new Set();   // empty = show all categories
   var flatRefs = [];   // flattened refs of the CURRENT filtered view (drives prev/next)
   var currentIdx = -1;
 
@@ -558,9 +558,17 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
     CATEGORIES.forEach(function(cat){
       var count = allRefs.filter(function(r){ return r.category === cat.emoji; }).length;
       if (!count) return;
-      html += '<button class="filter-pill active" data-cat="' + cat.emoji + '">' + cat.emoji + ' ' + cat.label + ' <span class="count">' + count.toLocaleString() + '</span></button>';
+      html += '<button class="filter-pill" data-cat="' + cat.emoji + '">' + cat.emoji + ' ' + cat.label + ' <span class="count">' + count.toLocaleString() + '</span></button>';
     });
     filtersEl.innerHTML = html;
+  }
+
+  function syncFilterPills(){
+    filtersEl.querySelector('[data-cat="ALL"]').classList.toggle('active', activeCats.size === 0);
+    filtersEl.querySelectorAll('.filter-pill').forEach(function(b){
+      if (b.dataset.cat === 'ALL') return;
+      b.classList.toggle('active', activeCats.has(b.dataset.cat));
+    });
   }
 
   function onFilterClick(e){
@@ -568,24 +576,14 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
     if (!btn) return;
     var cat = btn.dataset.cat;
     if (cat === 'ALL'){
-      if (btn.classList.contains('active')) return;
-      filtersEl.querySelectorAll('.filter-pill').forEach(function(b){ b.classList.add('active'); });
-      activeCats = new Set(CAT_EMOJIS);
+      activeCats = new Set();                 // show all
+    } else if (activeCats.has(cat)){
+      activeCats.delete(cat);                  // click an active one → drop it
     } else {
-      btn.classList.toggle('active');
-      filtersEl.querySelector('[data-cat="ALL"]').classList.remove('active');
-      activeCats = new Set();
-      filtersEl.querySelectorAll('.filter-pill.active').forEach(function(b){
-        if (b.dataset.cat !== 'ALL') activeCats.add(b.dataset.cat);
-      });
-      if (activeCats.size === 0){
-        filtersEl.querySelector('[data-cat="ALL"]').classList.add('active');
-        filtersEl.querySelectorAll('.filter-pill').forEach(function(b){ b.classList.add('active'); });
-        activeCats = new Set(CAT_EMOJIS);
-      } else if (activeCats.size === CAT_EMOJIS.length){
-        filtersEl.querySelector('[data-cat="ALL"]').classList.add('active');
-      }
+      activeCats.add(cat);                     // narrow to / add this category
     }
+    if (activeCats.size === CAT_EMOJIS.length) activeCats = new Set();  // all == none
+    syncFilterPills();
     render();
   }
 
@@ -617,7 +615,7 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
 
   // ===== FILTERING =====
   function refMatches(r){
-    if (activeCats.size < CAT_EMOJIS.length && !activeCats.has(r.category)) return false;
+    if (activeCats.size > 0 && !activeCats.has(r.category)) return false;
     if (query){
       if (norm(r.title).indexOf(query) === -1 && norm(r.author).indexOf(query) === -1) return false;
     }
@@ -629,7 +627,7 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
     var eps = data.episodes.map(function(e){
       var epMatch = query && norm(e.episode).indexOf(query) !== -1;
       var refs = e.references.filter(function(r){
-        if (activeCats.size < CAT_EMOJIS.length && !activeCats.has(r.category)) return false;
+        if (activeCats.size > 0 && !activeCats.has(r.category)) return false;
         if (query && !epMatch){
           if (norm(r.title).indexOf(query) === -1 && norm(r.author).indexOf(query) === -1) return false;
         }
