@@ -27,6 +27,11 @@ CATALOGS = {
         "source": "todopoderosos.json",
         "covers_dir": None,
         "favicon": "🎙️",
+        # Warm gold — the studio-mic, awards-season register of the show.
+        "accent": {
+            "dark":  ("#c9903a", "#e8b45a", "201,144,58", ".15", ".08"),
+            "light": ("#a6702a", "#8a5c1e", "166,112,42", ".18", ".10"),
+        },
         "badge": "Podcast · 2014–2026",
         "h1_main": "Todopoderosos",
         "h1_sub": "Enciclopedia de Referencias",
@@ -45,6 +50,11 @@ CATALOGS = {
         "source": "aqui-hay-dragones.json",
         "covers_dir": os.path.join(ROOT, "covers-aqui-hay-dragones"),
         "favicon": "🐉",
+        # Emerald — the dragon's-hoard green that sets this catalog apart from Todopoderosos.
+        "accent": {
+            "dark":  ("#4f9d78", "#6fc79a", "80,157,120", ".15", ".08"),
+            "light": ("#2f7a57", "#256b4a", "47,122,87", ".18", ".10"),
+        },
         "badge": "Podcast",
         "h1_main": "Aquí hay Dragones",
         "h1_sub": "Enciclopedia de Referencias",
@@ -63,6 +73,12 @@ CATALOGS = {
 }
 
 REF_FIELDS = ("category", "title", "author", "amazon_url", "image", "desc", "id")
+
+
+def accent_vars(base, light, rgb, glow_a, dim_a):
+    """Render the accent CSS custom properties for one theme."""
+    return (f"--gold: {base}; --gold-light: {light}; "
+            f"--gold-glow: rgba({rgb},{glow_a}); --gold-dim: rgba({rgb},{dim_a});")
 
 
 def normalize(slug, cfg, template):
@@ -127,7 +143,10 @@ def normalize(slug, cfg, template):
 
     # Render the page from the shared template.
     js_cfg = json.dumps(cfg["js"], ensure_ascii=False)
+    accent = cfg["accent"]
     page = (template
+            .replace("__ACCENT_DARK__", accent_vars(*accent["dark"]))
+            .replace("__ACCENT_LIGHT__", accent_vars(*accent["light"]))
             .replace("__TITLE__", escape(f'{cfg["h1_main"]} · {cfg["h1_sub"]}'))
             .replace("__FAVICON__", cfg["favicon"])
             .replace("__BADGE__", escape(cfg["badge"]))
