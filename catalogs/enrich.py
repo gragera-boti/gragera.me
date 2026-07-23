@@ -677,6 +677,30 @@ def write_progress(source, slug, done, total, st):
     os.replace(tmp, PROGRESS_PATH)
 
 
+def write_data(path, data):
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False)
+    os.replace(tmp, path)          # atomic — readers never see a half-written file
+
+
+def apply_cache(data, cache, src, only_missing):
+    applied = 0
+    for ep in data["episodes"]:
+        for r in ep["references"]:
+            if r.get("category") not in src["cats"]:
+                continue
+            if only_missing and r.get(src["id_field"]) is not None:
+                continue
+            key, _ = src["itemkey"](r)
+            res = cache.get(key)
+            if not res or res.get("miss"):
+                continue
+            src["apply"](r, res)
+            applied += 1
+    return applied
+
+
 def unique_keys(episodes, src):
     seen = {}
     for ep in episodes:
@@ -723,9 +747,12 @@ def enrich_slug(slug, args, cache, src):
             cache[key] = res
             st["queried"] += 1
         processed += 1
-        if processed % 25 == 0:               # periodic flush → crash-safe + live progress
+        if processed % 25 == 0:               # periodic flush → crash-safe, live progress, incremental deploy
             save_cache(cache)
             write_progress(args.source, slug, processed, len(todo), st)
+            if not args.dry_run:
+                apply_cache(data, cache, src, args.only_missing)
+                write_data(path, data)
         if res.get("miss"):
             st["miss"] += 1
             if args.dry_run:
@@ -740,20 +767,8 @@ def enrich_slug(slug, args, cache, src):
     write_progress(args.source, slug, len(todo), len(todo), st)
     applied = 0
     if not args.dry_run:
-        for ep in data["episodes"]:
-            for r in ep["references"]:
-                if r.get("category") not in src["cats"]:
-                    continue
-                if args.only_missing and r.get(src["id_field"]) is not None:
-                    continue
-                key, _ = src["itemkey"](r)
-                res = cache.get(key)
-                if not res or res.get("miss"):
-                    continue
-                src["apply"](r, res)
-                applied += 1
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False)
+        applied = apply_cache(data, cache, src, args.only_missing)
+        write_data(path, data)
 
     print(f"  queried={st['queried']} cached={st['cached']} | high={st['high']} "
           f"medium={st['medium']} miss={st['miss']}"
