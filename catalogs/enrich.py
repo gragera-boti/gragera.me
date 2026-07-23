@@ -45,7 +45,7 @@ CACHE_PATH = os.path.join(DATA_DIR, ".tmdb_cache.json")
 PROGRESS_PATH = os.path.join(DATA_DIR, ".enrich_progress.json")
 UA = "gragera.me-catalog-enricher/1.0 (https://gragera.me)"
 
-CAT_MOVIE, CAT_TV, CAT_BOOK, CAT_COMIC, CAT_MUSIC = "🎬", "📺", "📚", "📖", "🎵"
+CAT_MOVIE, CAT_TV, CAT_BOOK, CAT_COMIC, CAT_MUSIC, CAT_GAME = "🎬", "📺", "📚", "📖", "🎵", "🎮"
 
 
 class DailyQuota(Exception):
@@ -539,6 +539,98 @@ def music_apply(ref, res):
     ref["music_confidence"] = res["confidence"]
 
 
+# ════════════════════════════════════════════════════════════════════════════
+# Wikipedia source (📚📖🎮 — Spanish description + correct article image, no key/quota)
+# ════════════════════════════════════════════════════════════════════════════
+WIKI_API = "https://es.wikipedia.org/w/api.php"
+WIKI_SUMMARY = "https://es.wikipedia.org/api/rest_v1/page/summary/"
+
+
+def wiki_key():
+    return ""            # no key/quota — Wikipedia read API only needs a UA
+
+
+def wiki_itemkey(ref):
+    title = strip_parens(ref.get("title", ""))
+    author = ref.get("author", "") or ""
+    key = f"wiki|{ref.get('category')}|{norm(title)}|{norm(author)}"
+    return key, {"title": title, "author": author}
+
+
+def wiki_search(query):
+    url = WIKI_API + "?" + urllib.parse.urlencode({
+        "action": "query", "list": "search", "srsearch": query,
+        "format": "json", "srlimit": 5, "srnamespace": 0})
+    data, _ = http_json(url)
+    return [r["title"] for r in ((data or {}).get("query", {}).get("search", []) or [])]
+
+
+def wiki_summary(page_title):
+    url = WIKI_SUMMARY + urllib.parse.quote(page_title.replace(" ", "_"), safe="")
+    data, _ = http_json(url)
+    return data
+
+
+# A book/comic/game should never resolve to a film/series/song article.
+WIKI_WRONG_MEDIA = re.compile(
+    r"\((?:pel[ií]cula|film|serie|serie de televisi[oó]n|miniserie|telenovela|"
+    r"canci[oó]n|[aá]lbum|banda sonora|[oó]pera|programa[^)]*)\)\s*$", re.I)
+
+
+def wiki_build(s, conf):
+    img = (s.get("thumbnail") or {}).get("source") or (s.get("originalimage") or {}).get("source")
+    extract = (s.get("extract") or "").strip()
+    return {"source": "wiki", "matched_title": s.get("title", ""),
+            "image": img, "desc": extract or None, "confidence": conf}
+
+
+def wiki_lookup(query, nt):
+    """Return (summary, conf) — exact-title match preferred over partial."""
+    cands = wiki_search(query)
+    time.sleep(0.1)
+    best = None
+    for pt in cands[:5]:
+        if WIKI_WRONG_MEDIA.search(pt):          # wrong medium for a text/game ref
+            continue
+        s = wiki_summary(pt)
+        time.sleep(0.1)
+        if not s or s.get("type") == "disambiguation":
+            continue
+        if not ((s.get("extract") or "").strip() or (s.get("thumbnail") or {}).get("source")):
+            continue
+        st = norm(s.get("title", ""))
+        if st == nt:
+            return s, "high"
+        if best is None and len(nt) > 3 and (nt in st or st in nt):
+            best = s
+    return (best, "medium") if best else (None, None)
+
+
+def wiki_classify(meta):
+    title, author = meta["title"], meta["author"]
+    nt = norm(title)
+    # Title alone surfaces Wikipedia's primary topic (the work itself); only add
+    # the author to disambiguate when the title alone didn't find an exact hit.
+    s, conf = wiki_lookup(title, nt)
+    if conf != "high" and author:
+        s2, conf2 = wiki_lookup(title + " " + author, nt)
+        if conf2 == "high" or (conf2 and not conf):
+            s, conf = s2, conf2
+    return wiki_build(s, conf) if s else {"miss": True}
+
+
+def wiki_apply(ref, res):
+    # Keep a trusted cover (TMDB/Spotify/Google Books) but still take Wikipedia's
+    # Spanish description; otherwise replace the unreliable original image too.
+    trusted = ref.get("book_confidence") or ref.get("tmdb_id") or \
+        ref.get("sp_id") or ref.get("comic_confidence")
+    if res.get("image") and not trusted:
+        ref["image"] = res["image"]
+    if res.get("desc") and not ref.get("desc"):
+        ref["desc"] = res["desc"]
+    ref["wiki_confidence"] = res["confidence"]
+
+
 # ── source registry ──────────────────────────────────────────────────────────
 SOURCES = {
     "tmdb": {"cats": (CAT_MOVIE, CAT_TV), "itemkey": tmdb_itemkey,
@@ -553,6 +645,9 @@ SOURCES = {
     "music": {"cats": (CAT_MUSIC,), "itemkey": music_itemkey,
               "classify": music_classify, "apply": music_apply, "id_field": "sp_id",
               "label": "music"},
+    "wiki": {"cats": (CAT_BOOK, CAT_COMIC, CAT_GAME), "itemkey": wiki_itemkey,
+             "classify": wiki_classify, "apply": wiki_apply, "id_field": "wiki_confidence",
+             "label": "book/comic/game"},
 }
 
 
