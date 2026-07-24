@@ -64,6 +64,12 @@ CATALOGS = {
 
 REF_FIELDS = ("category", "title", "author", "amazon_url", "image", "desc", "id")
 
+# The original pipeline's Wikipedia images are unreliable for these categories
+# (wrong covers), so only show an image when it comes from a verified source.
+UNTRUSTED_IMAGE_CATS = {"📚", "📖", "🎮", "🎵"}
+TRUST_FIELDS = ("tmdb_id", "sp_id", "book_confidence", "comic_confidence",
+                "music_confidence", "wiki_confidence")
+
 
 def normalize(slug, cfg, template):
     src = os.path.join(DATA_DIR, cfg["source"])
@@ -93,6 +99,11 @@ def normalize(slug, cfg, template):
                     if os.path.exists(os.path.join(covers_src, name)):
                         image = "covers/" + name
                         copied_covers.add(name)
+
+            # Drop unverified images in the categories where originals are unreliable.
+            if (image and r.get("category") in UNTRUSTED_IMAGE_CATS
+                    and not any(r.get(f) for f in TRUST_FIELDS)):
+                image = ""
 
             ref = {
                 "id": r["id"] if isinstance(r.get("id"), int) else next_id,

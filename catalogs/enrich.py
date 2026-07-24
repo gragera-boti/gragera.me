@@ -591,8 +591,21 @@ def wiki_build(s, conf):
             "image": img, "desc": extract or None, "confidence": conf}
 
 
-def wiki_lookup(query, nt, wrong_re):
-    """Return (summary, conf) — exact-title match preferred over partial."""
+def author_in_text(author, text):
+    """True if the creator is named in the article — guards against same-titled
+    but unrelated articles (e.g. 'Cicatriz' the novel vs the medical scar)."""
+    na = norm(author)
+    if not na:
+        return True                              # no author to verify against
+    ntx = norm(text)
+    if na in ntx:
+        return True
+    return any(len(t) >= 4 and t in ntx for t in na.split())
+
+
+def wiki_lookup(query, nt, wrong_re, author):
+    """Return (summary, conf) — exact-title match preferred over partial, and
+    (when an author is known) the article must actually mention that author."""
     cands = wiki_search(query)
     time.sleep(0.1)
     best = None
@@ -603,8 +616,11 @@ def wiki_lookup(query, nt, wrong_re):
         time.sleep(0.1)
         if not s or s.get("type") == "disambiguation":
             continue
-        if not ((s.get("extract") or "").strip() or (s.get("thumbnail") or {}).get("source")):
+        extract = (s.get("extract") or "").strip()
+        if not (extract or (s.get("thumbnail") or {}).get("source")):
             continue
+        if author and not author_in_text(author, extract):
+            continue                             # right title, wrong topic → skip
         st = norm(s.get("title", ""))
         if st == nt:
             return s, "high"
@@ -629,7 +645,7 @@ def wiki_classify(meta):
         queries = [title]
     s = conf = None
     for q in queries:
-        s2, conf2 = wiki_lookup(q, nt, wrong_re)
+        s2, conf2 = wiki_lookup(q, nt, wrong_re, author)
         if conf2 == "high":
             s, conf = s2, conf2
             break
