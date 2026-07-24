@@ -19,16 +19,13 @@
     --card-hover: #231e19;
     --border: #2a241f;
     --border-light: #3d352e;
-    --gold: #c9903a;
-    --gold-light: #e8b45a;
-    --gold-glow: rgba(201, 144, 58, .15);
-    --gold-dim: rgba(201, 144, 58, .08);
+    __ACCENT_DARK__
     --text: #f0ede8;
     --text-dim: #9e948a;
     --text-muted: #6b6258;
     --shadow-modal: 0 24px 80px rgba(0,0,0,.6);
     --cover-shadow: 0 8px 32px rgba(0,0,0,.5);
-    --header-grad: rgba(201,144,58,.08);
+    --header-grad: var(--gold-dim);
     --controls-bg: rgba(10,8,6,.92);
     --radius: 12px;
     --radius-sm: 8px;
@@ -43,16 +40,13 @@
     --card-hover: #f7f2e9;
     --border: #e6ddcf;
     --border-light: #d4c8b4;
-    --gold: #a6702a;
-    --gold-light: #8a5c1e;
-    --gold-glow: rgba(166, 112, 42, .18);
-    --gold-dim: rgba(166, 112, 42, .10);
+    __ACCENT_LIGHT__
     --text: #2a231b;
     --text-dim: #6b6053;
     --text-muted: #9a8e7c;
     --shadow-modal: 0 24px 80px rgba(60,45,20,.25);
     --cover-shadow: 0 8px 28px rgba(60,45,20,.18);
-    --header-grad: rgba(166,112,42,.10);
+    --header-grad: var(--gold-dim);
     --controls-bg: rgba(250,247,242,.90);
   }
   html { scroll-behavior: smooth; }
@@ -94,11 +88,26 @@
     border-bottom: 1px solid var(--border); overflow: hidden;
   }
   .header::before {
-    content: ''; position: absolute; inset: 0;
+    content: ''; position: absolute; inset: 0; z-index: 1;
     background: repeating-linear-gradient(90deg, transparent, transparent 40px, var(--gold-dim) 40px, var(--gold-dim) 41px);
-    opacity: .35; pointer-events: none;
+    opacity: .2; pointer-events: none;
   }
-  .header-inner { position: relative; max-width: 720px; margin: 0 auto; }
+  /* HERO COVER MOSAIC — ambient wall of real cover art behind the title */
+  .hero-mosaic {
+    position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+    display: flex; flex-direction: column; justify-content: center; gap: 10px; opacity: .16;
+    -webkit-mask-image: radial-gradient(ellipse 68% 88% at 50% 46%, transparent 0%, transparent 34%, #000 80%);
+    mask-image: radial-gradient(ellipse 68% 88% at 50% 46%, transparent 0%, transparent 34%, #000 80%);
+  }
+  :root[data-theme="light"] .hero-mosaic { opacity: .22; }
+  .hero-row { display: flex; gap: 10px; flex-shrink: 0; width: max-content; will-change: transform; }
+  .hero-row.r1 { animation: drift-l 90s linear infinite; }
+  .hero-row.r2 { animation: drift-r 120s linear infinite; }
+  .hero-row.r3 { animation: drift-l 150s linear infinite; }
+  .hero-row img { width: 62px; height: 90px; object-fit: cover; border-radius: 4px; flex-shrink: 0; display: block; }
+  @keyframes drift-l { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes drift-r { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+  .header-inner { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; }
   .header-badge {
     display: inline-block; padding: 4px 14px; border-radius: 20px;
     background: var(--gold-dim); border: 1px solid var(--gold-glow);
@@ -170,8 +179,13 @@
   .episodes-list { display: flex; flex-direction: column; gap: 8px; }
   .episode-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   .episode-card.hidden { display: none; }
-  .episode-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; cursor: pointer; user-select: none; }
+  .episode-header {
+    display: flex; align-items: center; gap: 12px; width: 100%; padding: 16px 20px;
+    cursor: pointer; user-select: none; text-align: left; color: inherit;
+    background: transparent; border: none; font-family: inherit;
+  }
   .episode-header:hover { background: var(--surface-hover); }
+  .episode-header:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
   .episode-number {
     min-width: 44px; height: 44px; padding: 0 6px;
     display: flex; align-items: center; justify-content: center;
@@ -329,6 +343,14 @@
     .modal-overlay { padding: 12px; }
     .modal-main { padding: 16px; }
   }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+    .hero-row { animation: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -339,6 +361,7 @@
 </div>
 
 <header class="header">
+  <div class="hero-mosaic" id="hero-mosaic" aria-hidden="true"></div>
   <div class="header-inner">
     <div class="header-badge">__BADGE__</div>
     <h1>__H1_MAIN__<br><span>__H1_SUB__</span></h1>
@@ -385,7 +408,7 @@
 <!-- ===== DETAIL MODAL ===== -->
 <div id="detail-modal" class="modal-overlay hidden">
   <div class="modal-backdrop" id="modal-backdrop"></div>
-  <div class="modal-content">
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <button class="modal-close" id="modal-close">&times;</button>
     <div class="modal-main">
       <div class="modal-cover-wrap">
@@ -472,6 +495,11 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
   var activeCats = new Set();   // empty = show all categories
   var flatRefs = [];   // flattened refs of the CURRENT filtered view (drives prev/next)
   var currentIdx = -1;
+  var allRefs = [];        // every ref, flattened once (stats/filters)
+  var allRefsFlat = [];    // every {ref, epTitle}, flattened once (modal fallback/related)
+  var currentView = [];    // filtered episodes currently rendered (lazy grid build)
+  var lastFocused = null;  // element focused before the modal opened
+  var searchTimer = null;
 
   // ===== DOM =====
   var $ = function(id){ return document.getElementById(id); };
@@ -497,6 +525,8 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
   var modalRelated = $('modal-related-section');
   var relatedAuthorName = $('related-author-name');
   var relatedItems = $('related-items');
+  var modalContent = modal.querySelector('.modal-content');
+  var heroMosaic = $('hero-mosaic');
 
   // ===== HELPERS =====
   function esc(s){ if(!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
@@ -525,10 +555,22 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
 
   // ===== INIT =====
   function init(){
+    // Flatten once, reuse everywhere (stats, filters, modal fallback, related).
+    data.episodes.forEach(function(e){
+      e.references.forEach(function(r){
+        allRefs.push(r);
+        allRefsFlat.push({ ref: r, epTitle: e.episode });
+      });
+    });
     updateStats();
     buildFilters();
+    buildHeroMosaic();
     render();
-    inputEl.addEventListener('input', function(){ query = norm(this.value.trim()); render(); });
+    inputEl.addEventListener('input', function(){
+      var self = this;
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function(){ query = norm(self.value.trim()); render(); }, 150);
+    });
     document.addEventListener('keydown', function(e){
       if (e.key === 'Escape') closeModal();
       if (modal.classList.contains('hidden')) return;
@@ -541,7 +583,6 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
 
   // ===== STATS =====
   function updateStats(){
-    var allRefs = data.episodes.reduce(function(a,e){ return a.concat(e.references); }, []);
     $('stat-episodes').textContent = data.episodes.length;
     $('stat-refs').textContent = allRefs.length.toLocaleString();
     var map = { film:'🎬', tv:'📺', book:'📚', comic:'📖', music:'🎵', games:'🎮' };
@@ -551,9 +592,31 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
     });
   }
 
+  // ===== HERO MOSAIC =====
+  function buildHeroMosaic(){
+    if (!heroMosaic) return;
+    // Unique cover images, shuffled — a faint wall of real cover art behind the title.
+    var seen = {}, imgs = [];
+    for (var i = 0; i < allRefs.length; i++){
+      var src = refImage(allRefs[i]);
+      if (src && !seen[src]){ seen[src] = 1; imgs.push(src); }
+    }
+    if (imgs.length < 8){ heroMosaic.style.display = 'none'; return; }
+    for (var j = imgs.length - 1; j > 0; j--){ var k = (Math.random() * (j + 1)) | 0; var t = imgs[j]; imgs[j] = imgs[k]; imgs[k] = t; }
+    imgs = imgs.slice(0, 66);
+    var rows = 3, perRow = Math.ceil(imgs.length / rows), html = '';
+    for (var row = 0; row < rows; row++){
+      var slice = imgs.slice(row * perRow, (row + 1) * perRow);
+      if (!slice.length) break;
+      var tiles = slice.map(function(src){ return '<img src="' + esc(src) + '" alt="" loading="lazy" referrerpolicy="no-referrer">'; }).join('');
+      // Duplicate the strip so the translateX(-50%) marquee loops seamlessly.
+      html += '<div class="hero-row r' + (row + 1) + '">' + tiles + tiles + '</div>';
+    }
+    heroMosaic.innerHTML = html;
+  }
+
   // ===== FILTERS =====
   function buildFilters(){
-    var allRefs = data.episodes.reduce(function(a,e){ return a.concat(e.references); }, []);
     var html = '<button class="filter-pill filter-pill-all active" data-cat="ALL">Todos <span class="count">' + allRefs.length.toLocaleString() + '</span></button>';
     CATEGORIES.forEach(function(cat){
       var count = allRefs.filter(function(r){ return r.category === cat.emoji; }).length;
@@ -597,12 +660,20 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
         if (!card.classList.contains('open')){
           listEl.querySelectorAll('.episode-card.open').forEach(function(oc){
             oc.classList.remove('open');
+            var oh = oc.querySelector('.episode-header'); if (oh) oh.setAttribute('aria-expanded', 'false');
             var ob = oc.querySelector('.episode-body'); if (ob) ob.style.maxHeight = '0';
           });
         }
+        var willOpen = !card.classList.contains('open');
         card.classList.toggle('open');
         var body = card.querySelector('.episode-body');
-        body.style.maxHeight = card.classList.contains('open') ? (body.scrollHeight + 'px') : '0';
+        if (willOpen && !body.dataset.built){
+          var idx = parseInt(card.dataset.ep, 10);
+          var ep = currentView[idx];
+          if (ep){ body.innerHTML = '<div class="refs-grid">' + ep.references.map(refChip).join('') + '</div>'; body.dataset.built = '1'; }
+        }
+        header.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        body.style.maxHeight = willOpen ? (body.scrollHeight + 'px') : '0';
         return;
       }
     }
@@ -664,19 +735,23 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
     }
     emptyEl.style.display = 'none';
 
+    currentView = filtered;
     var html = '';
-    filtered.forEach(function(ep){
+    filtered.forEach(function(ep, i){
       var refs = ep.references;
-      html += '<div class="episode-card' + (searching ? ' open' : '') + '" data-title="' + esc(ep.episode) + '">'
-        + '<div class="episode-header">'
-          + '<div class="episode-number">' + epNum(ep.episode) + '</div>'
-          + '<div class="episode-title">' + esc(epDisplay(ep.episode)) + '</div>'
-          + '<div class="episode-meta">' + refs.length + ' ref' + (refs.length !== 1 ? 's' : '') + '</div>'
-          + '<div class="episode-toggle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>'
-        + '</div>'
-        + '<div class="episode-body">'
-          + '<div class="refs-grid">' + refs.map(refChip).join('') + '</div>'
-        + '</div>'
+      var bodyId = 'epbody-' + i;
+      // Grids are built inline only while searching (everything is expanded); otherwise
+      // each episode's chips are built lazily the first time it's opened — keeps the DOM
+      // small on the large catalog instead of mounting thousands of chips up front.
+      var grid = searching ? '<div class="refs-grid">' + refs.map(refChip).join('') + '</div>' : '';
+      html += '<div class="episode-card' + (searching ? ' open' : '') + '" data-ep="' + i + '" data-title="' + esc(ep.episode) + '">'
+        + '<button class="episode-header" type="button" aria-expanded="' + (searching ? 'true' : 'false') + '" aria-controls="' + bodyId + '">'
+          + '<span class="episode-number">' + epNum(ep.episode) + '</span>'
+          + '<span class="episode-title">' + esc(epDisplay(ep.episode)) + '</span>'
+          + '<span class="episode-meta">' + refs.length + ' ref' + (refs.length !== 1 ? 's' : '') + '</span>'
+          + '<span class="episode-toggle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></span>'
+        + '</button>'
+        + '<div class="episode-body" id="' + bodyId + '"' + (searching ? ' data-built="1"' : '') + '>' + grid + '</div>'
       + '</div>';
     });
     listEl.innerHTML = html;
@@ -704,18 +779,17 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
   function openModal(refId, fromHash){
     var idx = flatRefs.findIndex(function(f){ return f.ref.id === refId; });
     if (idx === -1){
-      // Ref not in current view (e.g. deep link or related from other category): search all
-      flatRefs = [];
-      data.episodes.forEach(function(ep){
-        ep.references.forEach(function(r){ flatRefs.push({ ref: r, epTitle: ep.episode }); });
-      });
+      // Ref not in current view (deep link / related from another category): use the full list
+      flatRefs = allRefsFlat.slice();
       idx = flatRefs.findIndex(function(f){ return f.ref.id === refId; });
       if (idx === -1) return;
     }
+    if (modal.classList.contains('hidden')) lastFocused = document.activeElement;
     currentIdx = idx;
     renderModal();
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    modalClose.focus();
     if (!fromHash){
       try { history.pushState({ ref: refId }, '', '#ref-' + refId); } catch(e){}
     }
@@ -729,6 +803,7 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
     if (location.hash.indexOf('#ref-') === 0){
       try { history.pushState('', '', location.pathname + location.search); } catch(e){}
     }
+    if (lastFocused && lastFocused.focus){ try { lastFocused.focus(); } catch(e){} lastFocused = null; }
   }
 
   function navModal(dir){
@@ -777,10 +852,7 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
   function renderRelated(ref){
     if (!ref.author){ modalRelated.style.display = 'none'; return; }
     var seen = new Set();
-    var all = data.episodes.reduce(function(a,e){
-      e.references.forEach(function(r){ a.push({ ref: r, epTitle: e.episode }); });
-      return a;
-    }, []);
+    var all = allRefsFlat;
     var sameAuthor = all.filter(function(f){
       if (!f.ref.author || f.ref.author !== ref.author || f.ref.id === ref.id) return false;
       var key = f.ref.title + '|' + f.ref.category;
@@ -815,6 +887,17 @@ window.CATALOG_CONFIG = __CONFIG_JSON__;
   // ===== EVENTS =====
   modalBackdrop.addEventListener('click', closeModal);
   modalClose.addEventListener('click', closeModal);
+  // Keep Tab focus inside the dialog while it's open.
+  modalContent.addEventListener('keydown', function(e){
+    if (e.key !== 'Tab') return;
+    var focusables = Array.prototype.filter.call(
+      modalContent.querySelectorAll('a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'),
+      function(el){ return el.offsetParent !== null; });
+    if (!focusables.length) return;
+    var first = focusables[0], last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  });
   modalPrev.addEventListener('click', function(){ navModal(-1); });
   modalNext.addEventListener('click', function(){ navModal(1); });
   relatedItems.addEventListener('click', function(e){
