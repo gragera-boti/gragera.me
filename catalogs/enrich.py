@@ -554,7 +554,7 @@ def wiki_itemkey(ref):
     title = strip_parens(ref.get("title", ""))
     author = ref.get("author", "") or ""
     key = f"wiki|{ref.get('category')}|{norm(title)}|{norm(author)}"
-    return key, {"title": title, "author": author}
+    return key, {"title": title, "author": author, "cat": ref.get("category")}
 
 
 def wiki_search(query):
@@ -571,10 +571,17 @@ def wiki_summary(page_title):
     return data
 
 
-# A book/comic/game should never resolve to a film/series/song article.
-WIKI_WRONG_MEDIA = re.compile(
-    r"\((?:pel[ií]cula|film|serie|serie de televisi[oó]n|miniserie|telenovela|"
-    r"canci[oó]n|[aá]lbum|banda sonora|[oó]pera|programa[^)]*)\)\s*$", re.I)
+# Articles of the wrong medium for a given ref category. Text/game refs must not
+# resolve to a film/series/song; music refs must not resolve to a book/film/etc.
+# (but (canción)/(álbum) articles are exactly right for music).
+WIKI_WRONG = {
+    "text": re.compile(r"\((?:pel[ií]cula|film|serie|serie de televisi[oó]n|miniserie|"
+                       r"telenovela|canci[oó]n|sencillo|[aá]lbum|banda sonora|[oó]pera|"
+                       r"programa[^)]*)\)\s*$", re.I),
+    "music": re.compile(r"\((?:pel[ií]cula|film|serie|serie de televisi[oó]n|miniserie|"
+                        r"telenovela|novela|libro|historieta|c[oó]mic|videojuego|"
+                        r"programa[^)]*)\)\s*$", re.I),
+}
 
 
 def wiki_build(s, conf):
@@ -584,13 +591,13 @@ def wiki_build(s, conf):
             "image": img, "desc": extract or None, "confidence": conf}
 
 
-def wiki_lookup(query, nt):
+def wiki_lookup(query, nt, wrong_re):
     """Return (summary, conf) — exact-title match preferred over partial."""
     cands = wiki_search(query)
     time.sleep(0.1)
     best = None
     for pt in cands[:5]:
-        if WIKI_WRONG_MEDIA.search(pt):          # wrong medium for a text/game ref
+        if wrong_re.search(pt):                  # wrong medium for this ref's category
             continue
         s = wiki_summary(pt)
         time.sleep(0.1)
@@ -608,13 +615,25 @@ def wiki_lookup(query, nt):
 
 def wiki_classify(meta):
     title, author = meta["title"], meta["author"]
+    cat = meta.get("cat")
+    wrong_re = WIKI_WRONG["music"] if cat == CAT_MUSIC else WIKI_WRONG["text"]
     nt = norm(title)
-    # Title alone surfaces Wikipedia's primary topic (the work itself); only add
-    # the author to disambiguate when the title alone didn't find an exact hit.
-    s, conf = wiki_lookup(title, nt)
-    if conf != "high" and author:
-        s2, conf2 = wiki_lookup(title + " " + author, nt)
-        if conf2 == "high" or (conf2 and not conf):
+    # Books/etc: title alone surfaces Wikipedia's primary topic (the work itself),
+    # author only to disambiguate. Music: generic song titles need the artist, so
+    # lead with it (avoids e.g. "Imagine"→"Imaginé" accent collisions).
+    if cat == CAT_MUSIC and author:
+        queries = [title + " " + author, title]
+    elif author:
+        queries = [title, title + " " + author]
+    else:
+        queries = [title]
+    s = conf = None
+    for q in queries:
+        s2, conf2 = wiki_lookup(q, nt, wrong_re)
+        if conf2 == "high":
+            s, conf = s2, conf2
+            break
+        if conf2 and not conf:
             s, conf = s2, conf2
     return wiki_build(s, conf) if s else {"miss": True}
 
@@ -645,9 +664,9 @@ SOURCES = {
     "music": {"cats": (CAT_MUSIC,), "itemkey": music_itemkey,
               "classify": music_classify, "apply": music_apply, "id_field": "sp_id",
               "label": "music"},
-    "wiki": {"cats": (CAT_BOOK, CAT_COMIC, CAT_GAME), "itemkey": wiki_itemkey,
+    "wiki": {"cats": (CAT_BOOK, CAT_COMIC, CAT_GAME, CAT_MUSIC), "itemkey": wiki_itemkey,
              "classify": wiki_classify, "apply": wiki_apply, "id_field": "wiki_confidence",
-             "label": "book/comic/game"},
+             "label": "book/comic/game/music"},
 }
 
 
